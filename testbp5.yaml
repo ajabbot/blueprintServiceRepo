@@ -1,10 +1,10 @@
 formatVersion: 1
-name: Test BP5 - GitHub testbp5.yaml
-version: 1
+name: Test BP5 (updated) - GitHub testbp5.yaml
+version: 2
 inputs:
   cpu:
     type: integer
-    default: 1
+    default: 2
     minimum: 1
     maximum: 32
     title: CPU`er
