@@ -1,0 +1,62 @@
+formatVersion: 1
+name: Test BPany.yaml - GitHub
+version: 1
+inputs:
+  cpu:
+    type: integer
+    default: 1
+    minimum: 1
+    maximum: 32
+    title: CPU`er
+  Memorysize:
+    type: integer
+    default: 4
+    title: Minne (GB)
+    minimum: 2
+  Disks:
+    type: array
+    title: Ekstra disker
+    items:
+      type: object
+      properties:
+        stasjonsbokstav:
+          type: string
+          title: StasjonsBokstav
+          description: angi en bokstav for hvor denne disken skal kobles til.
+        size:
+          type: integer
+          title: Diskstørrelse i GB
+          minimum: 1
+          maximum: 1024
+resources:
+  Cloud_vSphere_Network_1:
+    type: Cloud.vSphere.Network
+    properties:
+      networkType: existing
+      constraints:
+        - tag: jpmc-network:group1
+  Cloud_vSphere_Machine_1:
+    type: Cloud.vSphere.Machine
+    properties:
+      ovfProperties: null
+      image: image
+      cpuCount: ${input.cpu}
+      totalMemoryMB: ${input.Memorysize*1024}
+      networks:
+        - network: ${resource.Cloud_vSphere_Network_1.id}
+          assignment: static
+      attachedDisks: ${map_to_object(resource.Cloud_vSphere_Disk_1[*].id, "source")}
+      cloudConfig: |
+        #ps1_sysnative
+        "testing" | out-file c:\tmp\demo.txt
+        "testing" | out-file c:\scripts\demo.txt
+  Cloud_vSphere_Disk_1:
+    type: Cloud.vSphere.Disk
+    allocatePerInstance: true
+    dependsOnPreviousInstances: true
+    #preventDelete: true
+    ignoreChanges: true
+    properties:
+      capacityGb: ${input.Disks[count.index].size}
+      count: ${length(input.Disks)}
+      name: ${"Disk" + to_string(count.index)}
